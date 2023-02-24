@@ -2,6 +2,8 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_error.h>
+#include <SDL2/SDL_mixer.h>
 #include <cstdlib>
 #include <iostream>
 #include <vector>

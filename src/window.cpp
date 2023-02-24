@@ -1,5 +1,7 @@
 #pragma once
 #include "window.hpp"
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_mixer.h>
 
 Game::Game() {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -17,6 +19,12 @@ Game::Game() {
     if (TTF_Init() != 0) {
         std::cout << "Error at TTF_Init. " << SDL_GetError() << std::endl;
         Cleanup(2);
+        exit(1);
+    }
+
+    if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) != 0) {
+        std::cout << "Error at Mix_OpenAudio. " << SDL_GetError() << std::endl; 
+        Cleanup(3);
         exit(1);
     }
 
@@ -69,12 +77,32 @@ void Game::RunTitleScreen() {
         font_src.h
     };
 
+    Mix_Music *dagger = Mix_LoadMUS("res/audio/ThisLifeAsADagger_Bridge.mp3");
+    Mix_PlayMusic(dagger, 2);
+
     bool running {true};
     SDL_Event event;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) running = false;
+            switch (event.type) {
+                case SDL_QUIT:
+                    running = false;
+                    break;
+
+                case SDL_KEYUP:
+                    switch (event.key.keysym.sym) {
+                        case SDLK_ESCAPE:
+                            running = false;
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                default:
+                    break;
+            }
         }
 
         SDL_RenderClear(m_renderer);
@@ -105,6 +133,7 @@ void Game::RunTitleScreen() {
         }
     }
 
+    Mix_FreeMusic(dagger);
     TTF_CloseFont(font);
     SDL_DestroyTexture(font_texture);
 }
@@ -123,6 +152,7 @@ void Game::Cleanup(int stage) {
         case 3:
             IMG_Quit();
             TTF_Quit();
+            Mix_CloseAudio();
             SDL_Quit();
             break;
 
